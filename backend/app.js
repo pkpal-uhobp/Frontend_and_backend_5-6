@@ -1,234 +1,315 @@
 const express = require("express");
-const cors = require("cors");
-const {nanoid} = require("nanoid");
+const { nanoid } = require("nanoid");
+
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
-app.use(cors({
-    origin: "http://localhost:3001",
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-}));
-
 app.use((req, res, next) => {
     res.on("finish", () => {
-        console.log(`[${new Date().toISOString()}] [${req.method}] ${res.statusCode} ${req.path}`);
-        if (["POST", "PUT", "PATCH"].includes(req.method)) {
+        console.log(
+            `[${new Date().toISOString()}] [${req.method}] ${res.statusCode} ${req.path}`
+        );
+        if (req.method === "POST" || req.method === "PUT" || req.method === "PATCH") {
             console.log("Body:", req.body);
         }
     });
     next();
 });
 
-let products = [{
-    id: nanoid(6),
-    title: "Смартфон Nova X12",
-    category: "Смартфоны",
-    description: '6.6" OLED, 256 ГБ, 5G, NFC.',
-    price: 39990,
-    stock: 12,
-    rating: 4.6,
-}, {
-    id: nanoid(6),
-    title: "Ноутбук AeroBook 15",
-    category: "Ноутбуки",
-    description: '15.6" IPS, i5, 16 ГБ, 512 ГБ SSD.',
-    price: 74990,
-    stock: 7,
-    rating: 4.5,
-}, {
-    id: nanoid(6),
-    title: "Наушники SoundPro ANC",
-    category: "Аудио",
-    description: "Активное шумоподавление, 30 часов, Bluetooth 5.3.",
-    price: 8990,
-    stock: 30,
-    rating: 4.4,
-}, {
-    id: nanoid(6),
-    title: "Игровая мышь PixelMouse G7",
-    category: "Периферия",
-    description: "Сенсор 26K DPI, 6 кнопок, RGB.",
-    price: 2490,
-    stock: 40,
-    rating: 4.2,
-}, {
-    id: nanoid(6),
-    title: "Клавиатура KeyMech 87",
-    category: "Периферия",
-    description: "Механическая TKL, горячая замена свитчей.",
-    price: 5990,
-    stock: 18,
-    rating: 4.3,
-}, {
-    id: nanoid(6),
-    title: 'Монитор ViewMax 27" 144Hz',
-    category: "Мониторы",
-    description: "27\", 2560×1440, 144Hz, IPS, FreeSync.",
-    price: 22990,
-    stock: 9,
-    rating: 4.5,
-}, {
-    id: nanoid(6),
-    title: "Смарт-часы FitTime S",
-    category: "Носимая электроника",
-    description: "Пульс, сон, уведомления, водозащита 5ATM.",
-    price: 6990,
-    stock: 25,
-    rating: 4.1,
-}, {
-    id: nanoid(6),
-    title: "Внешний SSD TurboDrive 1TB",
-    category: "Накопители",
-    description: "USB-C, до 1050 МБ/с, прочный корпус.",
-    price: 11990,
-    stock: 15,
-    rating: 4.7,
-}, {
-    id: nanoid(6),
-    title: "Wi‑Fi роутер NetAir AX3000",
-    category: "Сеть",
-    description: "Wi‑Fi 6, MU‑MIMO, 4 антенны.",
-    price: 4990,
-    stock: 22,
-    rating: 4.0,
-}, {
-    id: nanoid(6),
-    title: "Колонка BoomBox Mini",
-    category: "Аудио",
-    description: "Bluetooth-колонка, 12 часов, защита IPX7.",
-    price: 3490,
-    stock: 35,
-    rating: 4.3,
-},];
+let users = [
+    { id: nanoid(6), name: "Петр", age: 16 },
+    { id: nanoid(6), name: "Иван", age: 18 },
+    { id: nanoid(6), name: "Дарья", age: 20 }
+];
 
-function findProductOr404(id, res) {
-    const product = products.find((p) => p.id === id);
-    if (!product) {
-        res.status(404).json({error: "Product not found"});
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "API управления пользователями",
+            version: "1.0.0",
+            description: "Простое REST API для CRUD-операций над пользователями"
+        },
+        servers: [
+            {
+                url: `http://localhost:${port}`,
+                description: "Локальный сервер"
+            }
+        ]
+    },
+    apis: ["./app.js"]
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Users
+ *     description: CRUD операции над пользователями
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - name
+ *         - age
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: Автоматически сгенерированный уникальный ID пользователя
+ *           example: "abc123"
+ *         name:
+ *           type: string
+ *           description: Имя пользователя
+ *           example: "Петр"
+ *         age:
+ *           type: integer
+ *           description: Возраст пользователя
+ *           example: 16
+ *     UserCreate:
+ *       type: object
+ *       required:
+ *         - name
+ *         - age
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: "Петр"
+ *         age:
+ *           type: integer
+ *           example: 16
+ *     UserPatch:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: "Иван"
+ *         age:
+ *           type: integer
+ *           example: 19
+ *   responses:
+ *     NotFound:
+ *       description: Сущность не найдена
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               error:
+ *                 type: string
+ *                 example: "User not found"
+ */
+
+function findUserOr404(id, res) {
+    const user = users.find((u) => u.id === id);
+    if (!user) {
+        res.status(404).json({ error: "User not found" });
         return null;
     }
-    return product;
+    return user;
 }
 
-function isNonEmptyString(v) {
-    return typeof v === "string" && v.trim().length > 0;
-}
+/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Создаёт нового пользователя
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserCreate'
+ *     responses:
+ *       201:
+ *         description: Пользователь успешно создан
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Ошибка в теле запроса
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Name and age are required"
+ */
+app.post("/api/users", (req, res) => {
+    const { name, age } = req.body;
 
-function validateProductPayload(payload, {partial = false} = {}) {
-    const errors = [];
-    const checkField = (name, ok, message) => {
-        if (!ok) errors.push({field: name, message});
-    };
-
-    const {title, category, description, price, stock, rating} = payload ?? {};
-
-    if (!partial || title !== undefined) {
-        checkField("title", isNonEmptyString(title), "Title is required");
+    if (!name || age === undefined) {
+        return res.status(400).json({ error: "Name and age are required" });
     }
-    if (!partial || category !== undefined) {
-        checkField("category", isNonEmptyString(category), "Category is required");
-    }
-    if (!partial || description !== undefined) {
-        checkField("description", isNonEmptyString(description), "Description is required");
-    }
-    if (!partial || price !== undefined) {
-        const n = Number(price);
-        checkField("price", Number.isFinite(n) && n > 0, "Price must be > 0");
-    }
-    if (!partial || stock !== undefined) {
-        const n = Number(stock);
-        checkField("stock", Number.isFinite(n) && n >= 0 && Number.isInteger(n), "Stock must be an integer >= 0");
-    }
 
-    if (rating !== undefined) {
-        const n = Number(rating);
-        checkField("rating", Number.isFinite(n) && n >= 0 && n <= 5, "Rating must be between 0 and 5");
-    }
-
-    return errors;
-}
-
-app.get("/api/products", (req, res) => {
-    res.json(products);
-});
-
-app.get("/api/products/:id", (req, res) => {
-    const product = findProductOr404(req.params.id, res);
-    if (!product) return;
-    res.json(product);
-});
-
-app.post("/api/products", (req, res) => {
-    const errors = validateProductPayload(req.body, {partial: false});
-    if (errors.length) return res
-        .status(400)
-        .json({error: "Validation error", details: errors});
-
-    const {title, category, description, price, stock, rating} = req.body;
-
-    const newProduct = {
+    const newUser = {
         id: nanoid(6),
-        title: title.trim(),
-        category: category.trim(),
-        description: description.trim(),
-        price: Number(price),
-        stock: Number(stock), ...(rating !== undefined ? {rating: Number(rating)} : {}),
+        name: String(name).trim(),
+        age: Number(age)
     };
 
-    products.push(newProduct);
-    res.status(201).json(newProduct);
+    users.push(newUser);
+    res.status(201).json(newUser);
 });
 
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Возвращает список всех пользователей
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Список пользователей
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
+app.get("/api/users", (req, res) => {
+    res.json(users);
+});
 
-app.patch("/api/products/:id", (req, res) => {
-    const product = findProductOr404(req.params.id, res);
-    if (!product) return;
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Получает пользователя по ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID пользователя
+ *     responses:
+ *       200:
+ *         description: Данные пользователя
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+app.get("/api/users/:id", (req, res) => {
+    const user = findUserOr404(req.params.id, res);
+    if (!user) return;
+    res.json(user);
+});
 
-    if (req.body?.title === undefined && req.body?.category === undefined && req.body?.description === undefined && req.body?.price === undefined && req.body?.stock === undefined && req.body?.rating === undefined) {
-        return res.status(400).json({error: "Nothing to update"});
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   patch:
+ *     summary: Обновляет данные пользователя
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID пользователя
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserPatch'
+ *     responses:
+ *       200:
+ *         description: Обновлённый пользователь
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Нет данных для обновления
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Nothing to update"
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+app.patch("/api/users/:id", (req, res) => {
+    const user = findUserOr404(req.params.id, res);
+    if (!user) return;
+
+    if (req.body?.name === undefined && req.body?.age === undefined) {
+        return res.status(400).json({ error: "Nothing to update" });
     }
 
-    const errors = validateProductPayload(req.body, {partial: true});
-    if (errors.length) return res
-        .status(400)
-        .json({error: "Validation error", details: errors});
+    const { name, age } = req.body;
 
-    const {title, category, description, price, stock, rating} = req.body;
+    if (name !== undefined) user.name = String(name).trim();
+    if (age !== undefined) user.age = Number(age);
 
-    if (title !== undefined) product.title = title.trim();
-    if (category !== undefined) product.category = category.trim();
-    if (description !== undefined) product.description = description.trim();
-    if (price !== undefined) product.price = Number(price);
-    if (stock !== undefined) product.stock = Number(stock);
-    if (rating !== undefined) product.rating = Number(rating);
-
-    res.json(product);
+    res.json(user);
 });
 
-
-app.delete("/api/products/:id", (req, res) => {
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     summary: Удаляет пользователя
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID пользователя
+ *     responses:
+ *       204:
+ *         description: Пользователь успешно удалён (нет тела ответа)
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+app.delete("/api/users/:id", (req, res) => {
     const id = req.params.id;
-    const exists = products.some((p) => p.id === id);
-    if (!exists) return res.status(404).json({error: "Product not found"});
 
-    products = products.filter((p) => p.id !== id);
-    return res.status(204).send();
+    const exists = users.some((u) => u.id === id);
+    if (!exists) return res.status(404).json({ error: "User not found" });
+
+    users = users.filter((u) => u.id !== id);
+    res.status(204).send();
 });
 
 app.use((req, res) => {
-    res.status(404).json({error: "Not found"});
+    res.status(404).json({ error: "Not found" });
 });
 
 app.use((err, req, res, next) => {
     console.error("Unhandled error:", err);
-    res.status(500).json({error: "Internal server error"});
+    res.status(500).json({ error: "Internal server error" });
 });
 
 app.listen(port, () => {
-    console.log(`Backend API running on http://localhost:${port}`);
-    console.log(`GET products: http://localhost:${port}/api/products`);
+    console.log(`Сервер запущен на http://localhost:${port}`);
+    console.log(`Swagger UI: http://localhost:${port}/api-docs`);
 });
