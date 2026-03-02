@@ -2,34 +2,12 @@ import axios from "axios";
 
 const apiClient = axios.create({
     baseURL: "http://localhost:3000/api",
-    headers: {
-        "Content-Type": "application/json",
-        accept: "application/json",
-    },
+    headers: { "Content-Type": "application/json", accept: "application/json" },
 });
 
 export const api = {
-    createUser: async (user) => {
-        const response = await apiClient.post("/users", user);
-        return response.data;
-    },
-
-    getUsers: async () => {
-        const response = await apiClient.get("/users");
-        return response.data;
-    },
-
-    getUserById: async (id) => {
-        const response = await apiClient.get(`/users/${id}`);
-        return response.data;
-    },
-
-    updateUser: async (id, patch) => {
-        const response = await apiClient.patch(`/users/${id}`, patch);
-        return response.data;
-    },
-
-    deleteUser: async (id) => {
-        await apiClient.delete(`/users/${id}`);
-    },
+    getUsers: async () => (await apiClient.get("/users")).data,
+    createUser: async (user) => (await apiClient.post("/users", user)).data,
+    updateUser: async (id, patch) => (await apiClient.patch(`/users/${id}`, patch)).data,
+    deleteUser: async (id) => (await apiClient.delete(`/users/${id}`)),
 };
