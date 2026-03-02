@@ -9,28 +9,27 @@ const apiClient = axios.create({
 });
 
 export const api = {
-    createProduct: async (product) => {
-        const response = await apiClient.post("/products", product);
+    createUser: async (user) => {
+        const response = await apiClient.post("/users", user);
         return response.data;
     },
 
-    getProducts: async () => {
-        const response = await apiClient.get("/products");
+    getUsers: async () => {
+        const response = await apiClient.get("/users");
         return response.data;
     },
 
-    getProductById: async (id) => {
-        const response = await apiClient.get(`/products/${id}`);
+    getUserById: async (id) => {
+        const response = await apiClient.get(`/users/${id}`);
         return response.data;
     },
 
-    updateProduct: async (id, patch) => {
-        const response = await apiClient.patch(`/products/${id}`, patch);
+    updateUser: async (id, patch) => {
+        const response = await apiClient.patch(`/users/${id}`, patch);
         return response.data;
     },
 
-    deleteProduct: async (id) => {
-        const response = await apiClient.delete(`/products/${id}`);
-        return response.data;
+    deleteUser: async (id) => {
+        await apiClient.delete(`/users/${id}`);
     },
 };

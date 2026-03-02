@@ -6,25 +6,25 @@ import ProductModal from "../../components/ProductModal";
 import { api } from "../../api";
 
 export default function ProductsPage() {
-    const [products, setProducts] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState("create");
-    const [editingProduct, setEditingProduct] = useState(null);
+    const [editingUser, setEditingUser] = useState(null);
 
     useEffect(() => {
-        loadProducts();
+        loadUsers();
     }, []);
 
-    const loadProducts = async () => {
+    const loadUsers = async () => {
         try {
             setLoading(true);
-            const data = await api.getProducts();
-            setProducts(data);
+            const data = await api.getUsers();
+            setUsers(data);
         } catch (err) {
             console.error(err);
-            alert("Ошибка загрузки товаров");
+            alert("Ошибка загрузки пользователей");
         } finally {
             setLoading(false);
         }
@@ -32,48 +32,50 @@ export default function ProductsPage() {
 
     const openCreate = () => {
         setModalMode("create");
-        setEditingProduct(null);
+        setEditingUser(null);
         setModalOpen(true);
     };
 
-    const openEdit = (product) => {
+    const openEdit = (user) => {
         setModalMode("edit");
-        setEditingProduct(product);
+        setEditingUser(user);
         setModalOpen(true);
     };
 
     const closeModal = () => {
         setModalOpen(false);
-        setEditingProduct(null);
+        setEditingUser(null);
     };
 
     const handleDelete = async (id) => {
-        const ok = window.confirm("Удалить товар?");
+        const ok = window.confirm("Удалить пользователя?");
         if (!ok) return;
 
         try {
-            await api.deleteProduct(id);
-            setProducts((prev) => prev.filter((p) => p.id !== id));
+            await api.deleteUser(id);
+            setUsers((prev) => prev.filter((u) => u.id !== id));
         } catch (err) {
             console.error(err);
-            alert("Ошибка удаления товара");
+            alert("Ошибка удаления пользователя");
         }
     };
 
     const handleSubmitModal = async (payload) => {
         try {
             if (modalMode === "create") {
-                const created = await api.createProduct(payload);
-                setProducts((prev) => [...prev, created]);
+                const created = await api.createUser(payload);
+                setUsers((prev) => [...prev, created]);
             } else {
-                const updated = await api.updateProduct(payload.id, payload);
-                setProducts((prev) => prev.map((p) => (p.id === payload.id ? updated : p)));
+                const updated = await api.updateUser(payload.id, payload);
+                setUsers((prev) => prev.map((u) => (u.id === payload.id ? updated : u)));
             }
             closeModal();
         } catch (err) {
             console.error(err);
             const msg =
-                err?.response?.data?.error || err?.message || "Ошибка сохранения товара";
+                err?.response?.data?.error ||
+                err?.message ||
+                "Ошибка сохранения пользователя";
             alert(msg);
         }
     };
@@ -90,7 +92,7 @@ export default function ProductsPage() {
             <main className="main">
                 <div className="container">
                     <div className="toolbar">
-                        <h1 className="title">Товары</h1>
+                        <h1 className="title">Пользователи</h1>
                         <button className="btn btn--primary" onClick={openCreate}>
                             + Добавить
                         </button>
@@ -99,7 +101,7 @@ export default function ProductsPage() {
                     {loading ? (
                         <div className="empty">Загрузка...</div>
                     ) : (
-                        <ProductsList products={products} onEdit={openEdit} onDelete={handleDelete} />
+                        <ProductsList users={users} onEdit={openEdit} onDelete={handleDelete} />
                     )}
                 </div>
             </main>
@@ -111,7 +113,7 @@ export default function ProductsPage() {
             <ProductModal
                 open={modalOpen}
                 mode={modalMode}
-                initialProduct={editingProduct}
+                initialUser={editingUser}
                 onClose={closeModal}
                 onSubmit={handleSubmitModal}
             />
