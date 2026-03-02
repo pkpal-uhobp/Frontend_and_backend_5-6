@@ -24,7 +24,9 @@ app.use((req, res, next) => {
 let users = [
     { id: nanoid(6), name: "Петр", age: 16 },
     { id: nanoid(6), name: "Иван", age: 18 },
-    { id: nanoid(6), name: "Дарья", age: 20 }
+    { id: nanoid(6), name: "Дарья", age: 20 },
+    { id: nanoid(6), name: "Мария", age: 22 },
+    { id: nanoid(6), name: "Алексей", age: 19 }
 ];
 
 const swaggerOptions = {
