@@ -35,6 +35,7 @@ frontend/  — React приложение (порт 3001)
 ```bash
 cd backend
 npm install
+npm install core
 npm start
 ```
 
@@ -136,4 +137,5 @@ npm start
 - Frontend: http://localhost:3001
 - Backend: http://localhost:3000
 - Swagger UI: http://localhost:3000/api-docs
+
 - Users API: http://localhost:3000/api/users
